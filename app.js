@@ -472,10 +472,16 @@
     const lines = text.split(/\r?\n/).map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean);
     const joined = lines.join('\n');
 
-    const isStatement = /\b(statement|account|opening balance|closing balance|transaction|withdraw|deposit|posted|description)\b/i.test(joined);
-    const looksLikeReceipt = /\b(subtotal|sub total|total|tax|change|cash tend|tendered|gst|cgst|sgst|vat)\b/i.test(joined);
+    // Strong signals — unambiguous structural cues
+    const STRONG_STATEMENT = /\b(statement period|account statement|narration|withdrawal\s+deposit|opening\s+balance|closing\s+balance|cardholder|posting\s+date|chq\/?ref)\b/i;
+    const STRONG_RECEIPT   = /\b(subtotal|sub\s*total|sales\s*tax|tendered|cash\s*tend|gst|cgst|sgst|change\s+due)\b/i;
 
-    if (isStatement && !looksLikeReceipt) return parseStatement(lines, filename);
+    if (STRONG_STATEMENT.test(joined)) return parseStatement(lines, filename);
+    if (STRONG_RECEIPT.test(joined))   return parseReceipt(lines, filename);
+
+    // Weak fallback — guess by structure (many date+amount lines = statement)
+    const dateAmtLines = lines.filter(l => /\d{1,2}[\/\-]\d{1,2}/.test(l) && /\d[\d,]*\.\d{2}\s*$/.test(l));
+    if (dateAmtLines.length >= 5) return parseStatement(lines, filename);
     return parseReceipt(lines, filename);
   }
 
@@ -487,34 +493,35 @@
     const total = guessTotal(lines);
     const lineItems = [];
 
-    // skip header lines (first 5) and footer-ish lines (bottom that contain TOTAL/etc.)
-    const SKIP_TOKENS = /^(sub\s*total|total|tax|gst|cgst|sgst|vat|change|cash|tender|debit|credit|balance|amount|round|tip|gratuity|service)/i;
+    // skip header lines (first 5) and footer-ish lines that aren't products
+    const SKIP_TOKENS = /^(sub\s*total|total|tax|gst|cgst|sgst|vat|change|cash|tender|debit|credit|balance|amount|round|tip|gratuity|service|visa|master|amex|discover|paid|payment|acct|account|approval|auth(orization)?|ref|aid|tip|due|saved|savings|loyalty)/i;
 
     for (const raw of lines) {
       const line = raw.trim();
       if (line.length < 4) continue;
       if (SKIP_TOKENS.test(line)) continue;
 
-      // Pattern A: "<name>  <qty>x  <unit>  <price>"  or "<name>  <price>"
       const priceMatch = line.match(/(-?\d[\d,]*\.\d{2})\s*[A-Z]?\s*$/);
       if (!priceMatch) continue;
       const price = parseFloat(priceMatch[1].replace(/,/g, ''));
       if (isNaN(price) || price <= 0) continue;
       let head = line.slice(0, priceMatch.index).trim();
-
-      // strip trailing tax flags or codes like " F", " T", " A", " E"
       head = head.replace(/\s+[A-Z]\s*$/,'').trim();
 
-      // qty pattern: "2 @ 1.50" or "2x"
+      // qty patterns:  "2 @ 1.50"  "2x 1.50"  "2.13 lb @ 0.58"
       let qty = 1, unitPrice = price;
-      const qtyAt = head.match(/(\d+(?:\.\d+)?)\s*(?:@|x|×)\s*(\d+(?:\.\d+)?)/i);
+      const qtyAt = head.match(/(\d+(?:\.\d+)?)\s*(?:lb|lbs|kg|g|gm|oz|ml|l|lt|ltr|gal|ct|pk|each|ea|count|cnt)?\s*(?:@|x|×)\s*(\d+(?:\.\d+)?)/i);
       if (qtyAt) {
         qty = parseFloat(qtyAt[1]);
         unitPrice = parseFloat(qtyAt[2]);
         head = head.replace(qtyAt[0], '').trim();
       }
-      // strip leading codes
-      head = head.replace(/^\d{4,}\s+/, '').trim();
+
+      // Clean up the displayed name
+      head = head.replace(/\b\d{8,}\b/g, ' ');     // strip long SKU codes
+      head = head.replace(/\/[a-z]+/gi, ' ');       // strip per-unit suffix "/lb"
+      head = head.replace(/\s+/g, ' ').trim();
+      head = head.replace(/^\d{4,}\s+/, '').trim(); // strip leading code
       head = head.replace(/^[A-Z]\s+/, '').trim();
       if (head.length < 2) continue;
 
