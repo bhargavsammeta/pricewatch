@@ -1,6 +1,6 @@
 /* pricewatch service worker — network-first so updates land immediately. */
 
-const CACHE = 'pricewatch-v1';
+const CACHE = 'pricewatch-v2';
 const ASSETS = [
   './',
   './index.html',

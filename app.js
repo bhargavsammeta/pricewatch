@@ -78,18 +78,23 @@
     const abs = Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return (n < 0 ? '-' : '') + sym + abs;
   }
+  function toDate(d) {
+    return d instanceof Date ? d : new Date(d);
+  }
   function fmtDate(d) {
-    if (!d) return '';
-    const dt = typeof d === 'string' ? new Date(d) : d;
-    if (isNaN(dt)) return '';
+    if (d == null || d === '') return '';
+    const dt = toDate(d);
+    if (isNaN(dt.getTime())) return '';
     return dt.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
   }
   function fmtMonth(d) {
-    const dt = typeof d === 'string' ? new Date(d) : d;
+    const dt = toDate(d);
+    if (isNaN(dt.getTime())) return '';
     return dt.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
   }
   function fmtRelative(d) {
-    const dt = typeof d === 'string' ? new Date(d) : d;
+    const dt = toDate(d);
+    if (isNaN(dt.getTime())) return '';
     const days = Math.round((Date.now() - dt.getTime()) / 86400000);
     if (days < 1) return 'today';
     if (days === 1) return 'yesterday';
@@ -200,18 +205,29 @@
         state.settings.currency = btn.dataset.cur;
       });
     });
-    $('#onb-continue').addEventListener('click', async () => {
-      await saveSetting('currency', state.settings.currency);
-      await saveSetting('onboarded', true);
+    $('#onb-continue').addEventListener('click', () => {
+      // Fallback if no currency was selected (e.g. preselect didn't fire on iOS)
+      if (!state.settings.currency) state.settings.currency = 'USD';
       state.onboarded = true;
+      // Swap UI immediately — never await IndexedDB before this. iOS Safari
+      // can hang IDB silently in private browsing / tracking-protection modes,
+      // and we don't want a blank screen while it works.
       $('#onboarding').classList.add('hidden');
       $('#app').classList.remove('hidden');
       $('#tabbar').classList.remove('hidden');
       renderAll();
+      // Persist in the background. If it fails, the user can still use the
+      // app this session and we'll retry on next change.
+      Promise.all([
+        saveSetting('currency', state.settings.currency),
+        saveSetting('onboarded', true),
+      ]).catch((err) => console.error('persist onboarding failed', err));
     });
-    // preselect USD
-    const def = $('#onboarding .cur-btn[data-cur="USD"]');
-    def && def.click();
+    // Preselect USD by setting state directly (avoid programmatic .click()
+    // which doesn't always fire on iOS Safari)
+    state.settings.currency = state.settings.currency || 'USD';
+    const def = $('#onboarding .cur-btn[data-cur="' + state.settings.currency + '"]');
+    if (def) def.classList.add('active');
   }
 
   // ============== Navigation ==============
@@ -1374,10 +1390,12 @@
       renderInsights();
     }));
 
-    // Drop zone
+    // Drop zone — the <label> wraps the hidden <input>, so tapping anywhere
+    // on the label triggers the file picker natively. Do NOT add a JS click
+    // forwarder here; that fires inp.click() twice on iOS and the OS can
+    // dismiss the second one, making the picker appear-and-vanish.
     const dz = $('#dropzone');
     const inp = $('#file-input');
-    dz.addEventListener('click', () => inp.click());
     inp.addEventListener('change', (e) => {
       if (e.target.files.length) ingestFiles(e.target.files);
       e.target.value = '';
