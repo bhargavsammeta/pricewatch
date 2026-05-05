@@ -232,6 +232,18 @@ main#app { min-height: 100vh; padding-bottom: calc(var(--tab-h) + var(--safe-bot
   padding: 14px 0;
   min-height: 56px;
 }
+/* Allow ellipsis to actually clip inside grid/flex cells. Without min-width:0,
+   grid items default to min-width:auto and overflow their column. */
+.queue-row > *,
+.item-row > *,
+.ins-row > *,
+.stmt-row > *,
+.purchase-row > *,
+.vendor-row > * { min-width: 0; }
+.queue-row .queue-info,
+.item-row .left,
+.ins-row .left,
+.stmt-row > div { min-width: 0; }
 .row.btn-row { width: 100%; padding: 14px 0; text-align: left; }
 .row.btn-row.danger .row-title { color: var(--danger); }
 .row-title { font-weight: 500; }

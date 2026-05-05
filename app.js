@@ -13,16 +13,16 @@
   const CURRENCY_SYMBOLS = { INR: '₹', USD: '$', EUR: '€', GBP: '£' };
 
   const DEFAULT_CATEGORIES = [
-    { id: 'groceries',     name: 'Groceries',     keywords: ['walmart','costco','kroger','safeway','target grocery','dmart','big bazaar','reliance fresh','more','spencer','grofers','blinkit','zepto','instamart','kirana','sprouts','trader','aldi','whole foods','heb'] },
-    { id: 'dining',        name: 'Dining',        keywords: ['starbucks','mcdonalds','mcd','kfc','burger','dominos','pizza','swiggy','zomato','chipotle','panera','subway','dunkin','tims','five guys','chai','restaurant','cafe','cafe coffee','ccd','barista','taco'] },
-    { id: 'transport',     name: 'Transport',     keywords: ['uber','lyft','ola','rapido','metro','transit','bart','caltrain','irctc','railway','bus'] },
-    { id: 'fuel',          name: 'Fuel',          keywords: ['shell','bp','exxon','chevron','arco','indian oil','iocl','hpcl','bpcl','reliance petrol','petrol','gas station','76 station'] },
-    { id: 'utilities',     name: 'Utilities',     keywords: ['electric','water','internet','xfinity','comcast','airtel','jio','vi ','vodafone','bsnl','tata power','mobile','recharge','at&t','verizon','t-mobile'] },
-    { id: 'shopping',      name: 'Shopping',      keywords: ['amazon','amzn','flipkart','myntra','ajio','ebay','etsy','target','best buy','ikea','home depot','nykaa','lowes'] },
-    { id: 'entertainment', name: 'Entertainment', keywords: ['movie','cinema','pvr','inox','amc','regal','steam','playstation','xbox','nintendo','ticketmaster','bookmyshow','game'] },
-    { id: 'subscriptions', name: 'Subscriptions', keywords: ['netflix','spotify','prime','hotstar','disney','apple.com','icloud','google ','adobe','dropbox','linkedin','youtube premium','hbo','max'] },
-    { id: 'health',        name: 'Health',        keywords: ['pharmacy','cvs','walgreens','apollo','medplus','doctor','clinic','hospital','medical','gym','fitness'] },
-    { id: 'travel',        name: 'Travel',        keywords: ['airline','airways','indigo','spicejet','vistara','united','delta','airbnb','marriott','hilton','oyo','makemytrip','goibibo','expedia','booking'] },
+    { id: 'groceries',     name: 'Groceries',     keywords: ['walmart','costco','kroger','safeway','target grocery','dmart','big bazaar','reliance fresh','more','spencer','grofers','blinkit','zepto','instamart','kirana','sprouts','trader','aldi','whole foods','wholefoods','wholefds','heb','wegmans','publix','meijer','food lion','stop & shop','harris teeter'] },
+    { id: 'dining',        name: 'Dining',        keywords: ['starbucks','mcdonalds','mcd','kfc','burger','dominos','pizza','swiggy','zomato','chipotle','panera','subway','dunkin','tims','five guys','chai','restaurant','cafe','cafe coffee','ccd','barista','taco','wendy','popeyes','chick-fil-a','chickfila','olive garden','applebee','ihop','denny','shake shack','sweetgreen','doordash','grubhub','ubereats','seamless'] },
+    { id: 'transport',     name: 'Transport',     keywords: ['uber','lyft','ola','rapido','metro','transit','bart','caltrain','irctc','railway','bus','amtrak','marta','muni','wmata','toll','parking','spothero','parkmobile'] },
+    { id: 'fuel',          name: 'Fuel',          keywords: ['shell','bp','exxon','chevron','arco','indian oil','iocl','hpcl','bpcl','reliance petrol','petrol','gas station','76 station','mobil','sunoco','marathon','valero','speedway','wawa','sheetz','7-eleven gas','costco gas'] },
+    { id: 'utilities',     name: 'Utilities',     keywords: ['electric','water','internet','xfinity','comcast','airtel','jio','vi ','vodafone','bsnl','tata power','mobile','recharge','at&t','verizon','t-mobile','spectrum','cox','frontier','centurylink'] },
+    { id: 'shopping',      name: 'Shopping',      keywords: ['amazon','amzn','amzone','flipkart','myntra','ajio','ebay','etsy','target','best buy','ikea','home depot','nykaa','lowes','walgreens shop','costco.com','walmart.com'] },
+    { id: 'entertainment', name: 'Entertainment', keywords: ['movie','cinema','cinemark','pvr','inox','amc','regal','steam','playstation','xbox','nintendo','ticketmaster','bookmyshow','game','spotify event','livenation','fandango','alamo drafthouse'] },
+    { id: 'subscriptions', name: 'Subscriptions', keywords: ['netflix','spotify','prime','hotstar','disney','apple.com','icloud','google ','adobe','dropbox','linkedin','youtube premium','hbo','max','openai','chatgpt','anthropic','claude','github','vercel','notion','figma','1password','nordvpn','expressvpn','peacock','paramount','hulu','crunchyroll'] },
+    { id: 'health',        name: 'Health',        keywords: ['pharmacy','cvs','walgreens','apollo','medplus','doctor','clinic','hospital','medical','gym','fitness','planet fitness','peloton','24 hour','equinox','dental','optical'] },
+    { id: 'travel',        name: 'Travel',        keywords: ['airline','airways','indigo','spicejet','vistara','united','delta','airbnb','marriott','hilton','oyo','makemytrip','goibibo','expedia','booking','southwest','american airlines','jetblue','spirit','frontier air','hyatt','holiday inn','ihg'] },
     { id: 'other',         name: 'Other',         keywords: [] },
   ];
 
@@ -44,7 +44,7 @@
     itemAliases: {},     // { 'coke 2l': 'coca-cola-2-l' }
     itemFilter: { search: '', category: 'all', store: 'all' },
     itemSort: 'recent',
-    insightsPeriod: 30,
+    insightsPeriod: 'all',
     activeReview: null,
   };
 
@@ -466,8 +466,26 @@
     for (let p = 1; p <= pdf.numPages; p++) {
       const page = await pdf.getPage(p);
       const content = await page.getTextContent();
-      const pageText = content.items.map(i => i.str).join(' ');
-      out.push(pageText);
+
+      // Reconstruct rows from positional info. pdf.js's transform = [a,b,c,d,e,f]
+      // where (e, f) is the position of the text. f is the y-coordinate (origin
+      // bottom-left in PDF space). Group items into rows by similar y, then sort
+      // within each row by x. Without this we'd lose every line break.
+      const rows = [];
+      for (const item of content.items) {
+        const str = item.str;
+        if (!str || !str.trim()) continue;
+        const x = item.transform[4];
+        const y = item.transform[5];
+        let row = rows.find(r => Math.abs(r.y - y) <= 2);
+        if (!row) { row = { y, parts: [] }; rows.push(row); }
+        row.parts.push({ x, str });
+      }
+      rows.sort((a, b) => b.y - a.y); // top-down
+      const lines = rows
+        .map(r => r.parts.sort((a, b) => a.x - b.x).map(p => p.str).join(' ').replace(/\s+/g, ' ').trim())
+        .filter(Boolean);
+      out.push(lines.join('\n'));
     }
     return out.join('\n\n');
   }
@@ -488,8 +506,8 @@
     const lines = text.split(/\r?\n/).map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean);
     const joined = lines.join('\n');
 
-    // Strong signals — unambiguous structural cues
-    const STRONG_STATEMENT = /\b(statement period|account statement|narration|withdrawal\s+deposit|opening\s+balance|closing\s+balance|cardholder|posting\s+date|chq\/?ref)\b/i;
+    // Strong signals — unambiguous structural cues for credit-card / bank statements
+    const STRONG_STATEMENT = /\b(statement period|account statement|narration|withdrawal\s+deposit|opening\s+balance|closing\s+balance|cardholder|posting\s+date|chq\/?ref|card\s+ending|payment\s+due\s+date|new\s+balance|closing\s+date|new\s+charges|american\s+express|card\s+member|previous\s+balance|minimum\s+payment\s+due)\b/i;
     const STRONG_RECEIPT   = /\b(subtotal|sub\s*total|sales\s*tax|tendered|cash\s*tend|gst|cgst|sgst|change\s+due)\b/i;
 
     if (STRONG_STATEMENT.test(joined)) return parseStatement(lines, filename);
@@ -548,33 +566,73 @@
   }
 
   // -------- Bank statement parsing --------
+  // Handles both single-line ("12/04/2026 MERCHANT 543.00 Dr") and multi-line
+  // formats where date+description are on one row and the amount is on the next
+  // (Amex, many bank PDFs).
   function parseStatement(lines, filename) {
-    const issuer = guessStore(lines) || 'Bank statement';
+    const issuer = guessStore(lines) || 'Statement';
     const currency = guessCurrency(lines);
     const date = guessDate(lines) || new Date().toISOString().slice(0,10);
-    const lineItems = []; // each transaction becomes a "line item" with qty=1, store=merchant
+    const lineItems = [];
 
-    const dateRe = /\b(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?|\d{1,2}\s[A-Z][a-z]{2})/;
-    const amtRe = /(-?\d[\d,]*\.\d{2})\s*(?:(Dr|Cr|CR|DR))?\s*$/;
+    const dateLineRe   = /^(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?|\d{1,2}\s[A-Z][a-z]{2})\*?\s*(.*)$/;
+    const inlineAmtRe  = /(-?\$?\s*-?\$?\d[\d,]*\.\d{2})\s*(?:(Dr|Cr|CR|DR))?\s*$/;
+    const onlyAmtRe    = /^(-?\$?\s*-?\$?\d[\d,]*\.\d{2})\s*(?:(Dr|Cr|CR|DR))?\s*$/;
+    const SECTION_HEAD = /^(Date\b|Description\b|Amount\b|Total\b|Category\b|Account\b|Card\s+Ending|Customer|Branch|Statement|Period|HEMANTH|MR\.|MS\.|MRS\.)/i;
+    // Summary-row labels that look like merchants if you collapse a date-only
+    // line with the next line. Reject when the "merchant" is just one of these.
+    const SUMMARY_LABEL = /^\s*(new\s+balance|minimum\s+payment(\s+due)?|payment\s+due(\s+date)?|credit\s+limit|available\s+credit|available\s+cash|previous\s+balance|new\s+charges(\s+summary)?|total\s+(fees|interest|new\s+charges|payments?(\s+and\s+credits)?|interest\s+charged)|opening\s+balance|closing\s+balance|closing\s+date|amount\s+enclosed|reward\s+dollars|less\s+payments|equals\s+new\s+balance|plus\s+(new\s+charges|fees|interest\s+charged)|account\s+(summary|details|ending)|payment\s+summary|credit\s+summary|rewards\s+summary)\s*$/i;
 
     let total = 0;
-    for (const raw of lines) {
-      const line = raw.trim();
-      const dateMatch = line.match(dateRe);
-      const amtMatch = line.match(amtRe);
-      if (!dateMatch || !amtMatch) continue;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const dm = line.match(dateLineRe);
+      if (!dm) continue;
 
-      const txDate = parseLooseDate(dateMatch[1]);
-      const amount = parseFloat(amtMatch[1].replace(/,/g, ''));
-      if (isNaN(amount)) continue;
-      const drcr = amtMatch[2];
-      // For statements: ignore credits (incoming money). Keep debits.
-      if (drcr && /CR/i.test(drcr)) continue;
+      const txDate = parseLooseDate(dm[1]);
+      let merchant = (dm[2] || '').trim();
+      let amount = null;
+      let drcr = null;
+      let consumed = 1;
 
-      let merchant = line.slice(dateMatch.index + dateMatch[0].length, amtMatch.index).trim();
-      merchant = merchant.replace(/^[\s|·]+|[\s|·]+$/g, '');
-      merchant = merchant.replace(/\s{2,}/g, ' ');
-      if (merchant.length < 2) continue;
+      // Inline amount on the same line?
+      const inline = merchant.match(inlineAmtRe);
+      if (inline) {
+        amount = parseAmount(inline[1]);
+        drcr = inline[2];
+        merchant = merchant.slice(0, inline.index).trim();
+      } else {
+        // Look ahead up to 4 lines for an amount-only line.
+        // Lines in between (no amount, not a new date, not a section heading)
+        // are appended to the merchant description.
+        for (let j = 1; j <= 4 && i + j < lines.length; j++) {
+          const next = lines[i + j];
+          if (dateLineRe.test(next) && !/^Date\b/i.test(next)) break;
+          if (SECTION_HEAD.test(next)) break;
+          const am = next.match(onlyAmtRe);
+          if (am) {
+            amount = parseAmount(am[1]);
+            drcr = am[2];
+            consumed = j + 1;
+            break;
+          }
+          if (next.length < 100) merchant += ' ' + next;
+        }
+      }
+
+      if (amount == null || isNaN(amount)) { continue; }
+      // Drop credits / payments / zero rows
+      if (drcr && /CR/i.test(drcr)) { i += consumed - 1; continue; }
+      if (amount <= 0) { i += consumed - 1; continue; }
+
+      merchant = cleanMerchantName(merchant);
+      if (merchant.length < 2) { i += consumed - 1; continue; }
+      // If the "merchant" is actually a summary-row label, it means we ate a
+      // bare date that wasn't a transaction (e.g. the remittance coupon's
+      // Payment Due Date) — skip it.
+      if (SUMMARY_LABEL.test(merchant)) { i += consumed - 1; continue; }
+      // Need at least 3 letters in the merchant to count it as a real txn.
+      if ((merchant.match(/[A-Za-z]/g) || []).length < 3) { i += consumed - 1; continue; }
 
       lineItems.push({
         name: merchant,
@@ -584,9 +642,32 @@
         date: txDate,
       });
       total += amount;
+      i += consumed - 1;
     }
 
     return { docType: 'statement', store: issuer, date, currency, total, lineItems };
+  }
+
+  function parseAmount(s) {
+    if (!s) return NaN;
+    const cleaned = s.replace(/[$\s]/g, '').replace(/,/g, '');
+    return parseFloat(cleaned);
+  }
+
+  // Strip the kind of garbage that bank statements wedge into descriptions:
+  // phone numbers, transaction codes, ZIP codes, email tails, separator junk.
+  function cleanMerchantName(s) {
+    if (!s) return '';
+    let out = s;
+    out = out.replace(/\+\d{10,}/g, ' ');         // +14158799686
+    out = out.replace(/\b\d{10,}\b/g, ' ');       // 8002463627
+    out = out.replace(/\b\d{6,}\b/g, ' ');        // 000010665, ref ids
+    out = out.replace(/\/\s*\S+@\S+/g, ' ');      // / jmingus@cine
+    out = out.replace(/[#*]/g, ' ');
+    out = out.replace(/\s+\d{5}(-\d{4})?\b/g, ' ');// trailing US zip
+    out = out.replace(/\s+/g, ' ').trim();
+    out = out.replace(/^[\s|·\-]+|[\s|·\-]+$/g, '');
+    return out;
   }
 
   function parseLooseDate(s) {
@@ -614,11 +695,23 @@
   }
 
   function guessStore(lines) {
-    const KNOWN = ['walmart','costco','target','kroger','safeway','whole foods','trader','aldi','heb','dmart','reliance','big bazaar','spencer','amazon','flipkart','starbucks','mcdonalds','swiggy','zomato','shell','bp','chevron','indian oil','iocl','hpcl','bpcl','chase','hdfc','sbi','icici','axis','citi','bank of america','wells fargo'];
-    const upper = lines.slice(0, 10).join(' ').toLowerCase();
+    const KNOWN = [
+      // banks & cards
+      'american express','amex','chase','hdfc','sbi','icici','axis','citi','bank of america','wells fargo','capital one','discover','us bank','barclays','synchrony','goldman','apple card',
+      // grocery/big-box
+      'walmart','costco','target','kroger','safeway','whole foods','trader','aldi','heb','dmart','reliance','big bazaar','spencer','wegmans','publix',
+      // dining/online
+      'amazon','flipkart','starbucks','mcdonalds','swiggy','zomato','doordash','grubhub',
+      // fuel
+      'shell','bp','chevron','exxon','indian oil','iocl','hpcl','bpcl',
+    ];
+    const upper = lines.slice(0, 20).join(' ').toLowerCase();
     for (const k of KNOWN) if (upper.includes(k)) return capitalize(k);
-    // first non-empty short uppercase line is likely the store name
-    for (const l of lines.slice(0, 6)) {
+    // Fall back to first short uppercase line — but skip cardholder-name lines
+    // (often lone capitalized first-last names which shouldn't become "store").
+    const SKIP_HEAD = /^(prepared for|account|card|customer|page|statement|hemanth|mr\.|mrs\.|ms\.)/i;
+    for (const l of lines.slice(0, 8)) {
+      if (SKIP_HEAD.test(l)) continue;
       if (l.length >= 3 && l.length <= 30 && l === l.toUpperCase() && /[A-Z]/.test(l)) {
         return capitalize(l.toLowerCase());
       }
@@ -1064,15 +1157,30 @@
       right: el('span', { class: 'price' }, fmtCurrency(li.unitPrice)),
     })));
 
-    // Top spend by category (use transactions' totals, else sum line items)
+    // Top spend by category — aggregate per-line-item, not per-transaction.
+    // For statements the transaction's own category is the issuer's category
+    // (usually 'other' for Amex / Chase / etc.) which would lump everything
+    // together. Each line item already has its own merchant-derived category.
     const catSpend = {};
     let grandTotal = 0;
-    for (const t of state.transactions) {
-      if (cutoff && new Date(t.date).getTime() < cutoff) continue;
-      const c = t.category || 'other';
-      const amt = t.total || state.lineItems.filter(li => li.transactionId === t.id).reduce((s,li) => s + (li.lineTotal ?? li.unitPrice ?? 0), 0);
+    const txWithItems = new Set();
+    for (const li of state.lineItems) {
+      if (cutoff && new Date(li.date).getTime() < cutoff) continue;
+      const c = li.category || 'other';
+      const amt = li.lineTotal ?? li.unitPrice ?? 0;
       catSpend[c] = (catSpend[c] || 0) + amt;
       grandTotal += amt;
+      if (li.transactionId) txWithItems.add(li.transactionId);
+    }
+    // Fall back to transaction-level totals only for txns with no line items
+    // (e.g. ingestion failed to extract items but we have a total).
+    for (const t of state.transactions) {
+      if (txWithItems.has(t.id)) continue;
+      if (cutoff && new Date(t.date).getTime() < cutoff) continue;
+      if (!t.total) continue;
+      const c = t.category || 'other';
+      catSpend[c] = (catSpend[c] || 0) + t.total;
+      grandTotal += t.total;
     }
     const topspend = Object.entries(catSpend).sort((a,b) => b[1] - a[1]).slice(0, 6);
     const maxSpend = topspend.length ? topspend[0][1] : 0;

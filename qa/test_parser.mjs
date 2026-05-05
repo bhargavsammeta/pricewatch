@@ -21,7 +21,7 @@ const QTY_UNIT_RE = /\b(\d+(\.\d+)?)\s?(lb|lbs|kg|g|gm|gms|oz|ml|l|lt|ltr|gal|ct
 function parseDocument(text) {
   const lines = text.split(/\r?\n/).map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean);
   const joined = lines.join('\n');
-  const STRONG_STATEMENT = /\b(statement period|account statement|narration|withdrawal\s+deposit|opening\s+balance|closing\s+balance|cardholder|posting\s+date|chq\/?ref)\b/i;
+  const STRONG_STATEMENT = /\b(statement period|account statement|narration|withdrawal\s+deposit|opening\s+balance|closing\s+balance|cardholder|posting\s+date|chq\/?ref|card\s+ending|payment\s+due\s+date|new\s+balance|closing\s+date|new\s+charges|american\s+express|card\s+member|previous\s+balance|minimum\s+payment\s+due)\b/i;
   const STRONG_RECEIPT   = /\b(subtotal|sub\s*total|sales\s*tax|tendered|cash\s*tend|gst|cgst|sgst|change\s+due)\b/i;
   if (STRONG_STATEMENT.test(joined)) return parseStatement(lines);
   if (STRONG_RECEIPT.test(joined))   return parseReceipt(lines);
@@ -77,32 +77,82 @@ function parseReceipt(lines) {
 }
 
 function parseStatement(lines) {
-  const issuer = guessStore(lines) || 'Bank statement';
+  const issuer = guessStore(lines) || 'Statement';
   const currency = guessCurrency(lines);
   const date = guessDate(lines);
   const lineItems = [];
-  const dateRe = /\b(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?|\d{1,2}\s[A-Z][a-z]{2})/;
-  const amtRe = /(-?\d[\d,]*\.\d{2})\s*(?:(Dr|Cr|CR|DR))?\s*$/;
+
+  const dateLineRe   = /^(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?|\d{1,2}\s[A-Z][a-z]{2})\*?\s*(.*)$/;
+  const inlineAmtRe  = /(-?\$?\s*-?\$?\d[\d,]*\.\d{2})\s*(?:(Dr|Cr|CR|DR))?\s*$/;
+  const onlyAmtRe    = /^(-?\$?\s*-?\$?\d[\d,]*\.\d{2})\s*(?:(Dr|Cr|CR|DR))?\s*$/;
+  const SECTION_HEAD = /^(Date\b|Description\b|Amount\b|Total\b|Category\b|Account\b|Card\s+Ending|Customer|Branch|Statement|Period|HEMANTH|MR\.|MS\.|MRS\.)/i;
+  const SUMMARY_LABEL = /^\s*(new\s+balance|minimum\s+payment(\s+due)?|payment\s+due(\s+date)?|credit\s+limit|available\s+credit|available\s+cash|previous\s+balance|new\s+charges(\s+summary)?|total\s+(fees|interest|new\s+charges|payments?(\s+and\s+credits)?|interest\s+charged)|opening\s+balance|closing\s+balance|closing\s+date|amount\s+enclosed|reward\s+dollars|less\s+payments|equals\s+new\s+balance|plus\s+(new\s+charges|fees|interest\s+charged)|account\s+(summary|details|ending)|payment\s+summary|credit\s+summary|rewards\s+summary)\s*$/i;
 
   let total = 0;
-  for (const raw of lines) {
-    const line = raw.trim();
-    const dateMatch = line.match(dateRe);
-    const amtMatch = line.match(amtRe);
-    if (!dateMatch || !amtMatch) continue;
-    const txDate = parseLooseDate(dateMatch[1]);
-    const amount = parseFloat(amtMatch[1].replace(/,/g, ''));
-    if (isNaN(amount)) continue;
-    const drcr = amtMatch[2];
-    if (drcr && /CR/i.test(drcr)) continue;
-    let merchant = line.slice(dateMatch.index + dateMatch[0].length, amtMatch.index).trim();
-    merchant = merchant.replace(/^[\s|·]+|[\s|·]+$/g, '');
-    merchant = merchant.replace(/\s{2,}/g, ' ');
-    if (merchant.length < 2) continue;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const dm = line.match(dateLineRe);
+    if (!dm) continue;
+
+    const txDate = parseLooseDate(dm[1]);
+    let merchant = (dm[2] || '').trim();
+    let amount = null;
+    let drcr = null;
+    let consumed = 1;
+
+    const inline = merchant.match(inlineAmtRe);
+    if (inline) {
+      amount = parseAmount(inline[1]);
+      drcr = inline[2];
+      merchant = merchant.slice(0, inline.index).trim();
+    } else {
+      for (let j = 1; j <= 4 && i + j < lines.length; j++) {
+        const next = lines[i + j];
+        if (dateLineRe.test(next) && !/^Date\b/i.test(next)) break;
+        if (SECTION_HEAD.test(next)) break;
+        const am = next.match(onlyAmtRe);
+        if (am) {
+          amount = parseAmount(am[1]);
+          drcr = am[2];
+          consumed = j + 1;
+          break;
+        }
+        if (next.length < 100) merchant += ' ' + next;
+      }
+    }
+
+    if (amount == null || isNaN(amount)) continue;
+    if (drcr && /CR/i.test(drcr)) { i += consumed - 1; continue; }
+    if (amount <= 0) { i += consumed - 1; continue; }
+
+    merchant = cleanMerchantName(merchant);
+    if (merchant.length < 2) { i += consumed - 1; continue; }
+    if (SUMMARY_LABEL.test(merchant)) { i += consumed - 1; continue; }
+    if ((merchant.match(/[A-Za-z]/g) || []).length < 3) { i += consumed - 1; continue; }
+
     lineItems.push({ name: merchant, qty: 1, unitPrice: amount, lineTotal: amount, date: txDate });
     total += amount;
+    i += consumed - 1;
   }
   return { docType: 'statement', store: issuer, date, currency, total, lineItems };
+}
+
+function parseAmount(s) {
+  if (!s) return NaN;
+  return parseFloat(s.replace(/[$\s]/g, '').replace(/,/g, ''));
+}
+function cleanMerchantName(s) {
+  if (!s) return '';
+  let out = s;
+  out = out.replace(/\+\d{10,}/g, ' ');
+  out = out.replace(/\b\d{10,}\b/g, ' ');
+  out = out.replace(/\b\d{6,}\b/g, ' ');
+  out = out.replace(/\/\s*\S+@\S+/g, ' ');
+  out = out.replace(/[#*]/g, ' ');
+  out = out.replace(/\s+\d{5}(-\d{4})?\b/g, ' ');
+  out = out.replace(/\s+/g, ' ').trim();
+  out = out.replace(/^[\s|·\-]+|[\s|·\-]+$/g, '');
+  return out;
 }
 
 function parseLooseDate(s) {
@@ -129,10 +179,17 @@ function parseLooseDate(s) {
 }
 
 function guessStore(lines) {
-  const KNOWN = ['walmart','costco','target','kroger','safeway','whole foods','trader','aldi','heb','dmart','reliance','big bazaar','spencer','amazon','flipkart','starbucks','mcdonalds','swiggy','zomato','shell','bp','chevron','indian oil','iocl','hpcl','bpcl','chase','hdfc','sbi','icici','axis','citi','bank of america','wells fargo'];
-  const upper = lines.slice(0, 10).join(' ').toLowerCase();
+  const KNOWN = [
+    'american express','amex','chase','hdfc','sbi','icici','axis','citi','bank of america','wells fargo','capital one','discover','us bank','barclays','synchrony','goldman','apple card',
+    'walmart','costco','target','kroger','safeway','whole foods','trader','aldi','heb','dmart','reliance','big bazaar','spencer','wegmans','publix',
+    'amazon','flipkart','starbucks','mcdonalds','swiggy','zomato','doordash','grubhub',
+    'shell','bp','chevron','exxon','indian oil','iocl','hpcl','bpcl',
+  ];
+  const upper = lines.slice(0, 20).join(' ').toLowerCase();
   for (const k of KNOWN) if (upper.includes(k)) return capitalize(k);
-  for (const l of lines.slice(0, 6)) {
+  const SKIP_HEAD = /^(prepared for|account|card|customer|page|statement|hemanth|mr\.|mrs\.|ms\.)/i;
+  for (const l of lines.slice(0, 8)) {
+    if (SKIP_HEAD.test(l)) continue;
     if (l.length >= 3 && l.length <= 30 && l === l.toUpperCase() && /[A-Z]/.test(l)) return capitalize(l.toLowerCase());
   }
   return lines[0] ? lines[0].slice(0, 32) : 'Unknown';
@@ -236,6 +293,26 @@ function near(a, b, eps = 0.01) { return a != null && b != null && Math.abs(a - 
   const got = parseDocument(text);
   check('chase: detected as statement', got.docType === 'statement', `got "${got.docType}"`);
   check('chase: at least 15 transactions parsed', got.lineItems.length >= 15, `got ${got.lineItems.length}`);
+}
+
+// ------------- Amex January 2026 statement -------------
+{
+  const text = fs.readFileSync(path.join(FIXTURES, 'amex_jan_2026.txt'), 'utf8');
+  const got = parseDocument(text);
+  check('amex: detected as statement', got.docType === 'statement', `got "${got.docType}"`);
+  check('amex: store identified as American Express', got.store === 'American Express', `got "${got.store}"`);
+  check('amex: 3 line items (excludes payment + zero rows)', got.lineItems.length === 3, `got ${got.lineItems.length}: ${got.lineItems.map(li => li.name + ' $' + li.unitPrice).join(' | ')}`);
+  const wholefoods = got.lineItems.find(li => /WHOLEFDS|Whole/i.test(li.name));
+  check('amex: WHOLEFDS captured at $16.73', wholefoods && near(wholefoods.unitPrice, 16.73), wholefoods ? `$${wholefoods.unitPrice}` : 'not found');
+  check('amex: WHOLEFDS name has no SKU/phone digits', wholefoods && !/\d{6,}/.test(wholefoods.name), wholefoods ? `name="${wholefoods.name}"` : 'not found');
+  const openai = got.lineItems.find(li => /openai|chatgpt/i.test(li.name));
+  check('amex: OPENAI captured at $21.78', openai && near(openai.unitPrice, 21.78), openai ? `$${openai.unitPrice}` : 'not found');
+  check('amex: OPENAI name has no phone', openai && !/\+?\d{10,}/.test(openai.name), openai ? `name="${openai.name}"` : 'not found');
+  const cinemark = got.lineItems.find(li => /cinemark/i.test(li.name));
+  check('amex: CINEMARK captured at $13.64', cinemark && near(cinemark.unitPrice, 13.64), cinemark ? `$${cinemark.unitPrice}` : 'not found');
+  check('amex: CINEMARK name has no email', cinemark && !/@/.test(cinemark.name), cinemark ? `name="${cinemark.name}"` : 'not found');
+  check('amex: total reconciles to $52.15', near(got.lineItems.reduce((s,li) => s + li.lineTotal, 0), 52.15), `sum=${got.lineItems.reduce((s,li) => s + li.lineTotal, 0)}`);
+  check('amex: no negative MOBILE PAYMENT included', !got.lineItems.some(li => /mobile payment/i.test(li.name)), got.lineItems.map(li => li.name).join(' | '));
 }
 
 // ------------- HDFC bank statement -------------

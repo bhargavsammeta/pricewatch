@@ -1,0 +1,46 @@
+Blue Cash Everyday from American Express
+Prepared for
+HEMANTH TIRUPATHI
+Account Ending 2-03004
+Closing Date 01/16/26
+Payment Summary
+New Balance $52.15
+Minimum Payment Due $40.00
+Payment Due Date 02/11/26
+Account Summary
+Previous Balance $129.13
+Less Payments/Credits $129.13
+Plus New Charges $52.15
+Plus Fees $0.00
+Plus Interest Charged $0.00
+Equals New Balance $52.15
+Payments and Credits Summary
+Category Account Details Total
+Payments -$129.13
+Credits HEMANTH TIRUPATHI 2-03004 $0.00
+Total Payments and Credits -$129.13
+Payments Details
+HEMANTH TIRUPATHI
+Card Ending 2-03004
+Date Description Amount
+12/29/25* MOBILE PAYMENT - THANK YOU -$129.13
+New Charges Summary
+Category Account Details Total
+Total New Charges $52.15
+New Charges Details
+HEMANTH TIRUPATHI
+Card Ending 2-03004
+Date Description Amount
+12/31/25 AmzOne WHOLEFDS CDP #10665 000010665 CEDAR PARK TX
+1234567891
+$16.73
+01/01/26 OPENAI *CHATGPT SUBSCR SAN FRANCISCO CA
++14158799686
+$21.78
+01/07/26 CINEMARK PLANO TX
+8002463627 / jmingus@cine
+$13.64
+Fees
+Total Fees for this Period $0.00
+Interest Charged
+Total Interest Charged for this Period $0.00

@@ -1,0 +1,14 @@
+{
+  "docType": "statement",
+  "currency": "USD",
+  "lineItems": [
+    { "name": "AmzOne WHOLEFDS CDP CEDAR PARK TX", "qty": 1, "unitPrice": 16.73, "lineTotal": 16.73, "date": "2025-12-31" },
+    { "name": "OPENAI CHATGPT SUBSCR SAN FRANCISCO CA", "qty": 1, "unitPrice": 21.78, "lineTotal": 21.78, "date": "2026-01-01" },
+    { "name": "CINEMARK PLANO TX", "qty": 1, "unitPrice": 13.64, "lineTotal": 13.64, "date": "2026-01-07" }
+  ],
+  "shouldNotInclude": [
+    "MOBILE PAYMENT (negative amount)",
+    "Total New Charges (no date prefix)",
+    "Total Fees (zero amount)"
+  ]
+}
