@@ -1,0 +1,36 @@
+HDFC BANK LTD
+Account Statement
+A/c No: XXXXXXXX4521        Customer: PRIYA SHARMA
+Branch: KORAMANGALA  BANGALORE - 560034
+Period:  01-Apr-2026 to 14-Apr-2026
+
+Date         Narration                                                Chq/Ref       Withdrawal      Deposit       Balance
+01/04/2026   UPI-AMAZONPAY-amazonpay@apl-PAY-403112098712             N403112098712     1,249.00 Dr             82,341.55
+01/04/2026   UPI-SWIGGY-swiggy@axisb-FOOD-403112456701                N403112456701       456.00 Dr             81,885.55
+02/04/2026   POS 4521XXXXXXXX1234 INDIAN OIL  HSR LAYOUT              POS00214459        2,100.00 Dr             79,785.55
+02/04/2026   UPI-ZOMATO-zomato@hdfcbank-DINNER-403119887421            N403119887421       612.50 Dr             79,173.05
+03/04/2026   UPI-BIGBASKET-bigbasket@icici-GROCERY                    N403124551209      1,847.30 Dr             77,325.75
+03/04/2026   NEFT CR-MURALI K-SALARY ADVANCE                           N403124889012                  15,000.00  92,325.75
+04/04/2026   UPI-DMART-dmart@paytm-MART                               N403131225901      2,486.40 Dr             89,839.35
+04/04/2026   UPI-SWIGGY-swiggy@axisb-INSTAMART                        N403131998421        389.00 Dr             89,450.35
+05/04/2026   POS 4521XXXXXXXX1234 BPCL FUEL  KORAMANGALA              POS00219872        1,500.00 Dr             87,950.35
+05/04/2026   UPI-ZOMATO-zomato@hdfcbank-LUNCH                         N403138772019        287.00 Dr             87,663.35
+06/04/2026   UPI-AMAZONPAY-amazonpay@apl-PAY                          N403144991188      3,499.00 Dr             84,164.35
+06/04/2026   UPI-PHONEPE-phonepe@ybl-RENT                             N403144998812     22,000.00 Dr             62,164.35
+07/04/2026   UPI-SWIGGY-swiggy@axisb-DINNER                           N403151220114        541.00 Dr             61,623.35
+08/04/2026   POS 4521XXXXXXXX1234 RELIANCE FRESH KORAMANGALA          POS00224109        1,234.55 Dr             60,388.80
+08/04/2026   UPI-ZOMATO-zomato@hdfcbank-BREAKFAST                     N403158821907        198.00 Dr             60,190.80
+09/04/2026   UPI-BIGBASKET-bigbasket@icici-GROCERY                    N403164492018      2,015.75 Dr             58,175.05
+09/04/2026   ATM-WDL-CASH-HDFC ATM   HSR LAYOUT                       ATM00081299        5,000.00 Dr             53,175.05
+10/04/2026   UPI-AMAZONPAY-amazonpay@apl-PAY                          N403171889201        899.00 Dr             52,276.05
+10/04/2026   POS 4521XXXXXXXX1234 INDIAN OIL  HSR LAYOUT              POS00229981        2,000.00 Dr             50,276.05
+11/04/2026   UPI-SWIGGY-swiggy@axisb-INSTAMART                        N403178329012        612.40 Dr             49,663.65
+12/04/2026   UPI-ZOMATO-zomato@hdfcbank-DINNER                        N403185447712        729.00 Dr             48,934.65
+12/04/2026   NEFT CR-PRIYA SHARMA-FREELANCE                            N403185998101                  25,000.00  73,934.65
+13/04/2026   UPI-DMART-dmart@paytm-MART                               N403192201907      1,789.20 Dr             72,145.45
+13/04/2026   UPI-NETFLIX-netflix@billdesk                             N403192887401        649.00 Dr             71,496.45
+14/04/2026   UPI-AMAZONPAY-amazonpay@apl-PAY                          N403199118872      2,148.50 Dr             69,347.95
+
+Closing Balance:  INR 69,347.95
+Total Debits:     INR 53,993.60
+Total Credits:    INR 40,000.00

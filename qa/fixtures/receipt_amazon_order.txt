@@ -1,0 +1,38 @@
+Amazon.com - Your Order
+
+Order Placed:  April 8, 2026
+Order #  114-7728991-2034521
+Ship to:  Alex Morgan, 4421 Lakeline Blvd Apt 217, Cedar Park TX 78613
+
+Items Ordered                                                          Price
+
+1 of:  Anker USB-C Charger 65W GaN Compact Wall Adapter                $34.99
+       Sold by: Anker Direct
+       Condition: New
+
+1 of:  Logitech MX Master 3S Wireless Performance Mouse - Graphite     $99.00
+       Sold by: Amazon.com Services LLC
+       Condition: New
+
+2 of:  AmazonBasics AAA Alkaline Batteries 36-Pack                     $14.49
+       Sold by: Amazon.com Services LLC
+       Condition: New
+
+1 of:  Hydro Flask 32oz Wide Mouth Water Bottle - Pacific              $44.95
+       Sold by: Hydro Flask
+       Condition: New
+
+1 of:  Brita Standard Replacement Filters 6-Count                      $29.97
+       Sold by: Amazon.com Services LLC
+       Condition: New
+
+                                          Item(s) Subtotal:           $237.89
+                                          Shipping & Handling:          $0.00
+                                          ----
+                                          Total before tax:           $237.89
+                                          Estimated tax to be collected:$19.62
+                                          ----
+                                          Grand Total:                $257.51
+
+Payment Method:  Visa ending in 1234
+Billing address: same as shipping

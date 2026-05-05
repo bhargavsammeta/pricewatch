@@ -1,0 +1,32 @@
+      COSTCO WHOLESALE
+      WAREHOUSE #0671
+      AUSTIN, TX
+      512-892-9100
+
+      Member  111887452210
+
+E   1204457  KSIG WTR40PK              4.49 E
+A   0096112  ORG SPINACH               4.99 A
+E   1389901  ROTISS CHKN               4.99 E
+A   0023118  EGGS 24CT                 6.39 A
+E   1450078  PAPER TWL12               19.99 E
+E   1098712  KS LAUNDRY                17.49 E
+A   0014592  BANANAS 3LB               1.49 A
+E   1290771  KS BACON 4PK              16.99 E
+A   0017812  AVOCADOS 6CT              7.99 A
+E   1334458  TIDE PODS81               21.99 E
+A   0019942  STRWBRY 2LB               6.99 A
+E   1556601  KS COFFEE3LB              17.99 E
+
+           SUBTOTAL          131.78
+           TAX                  4.94
+           ****  TOTAL       136.72  ****
+
+           VISA   ************1234
+           AID  A0000000031010
+           SEQ#  019887  AUTH# 00229Z
+
+      ITEMS SOLD: 12
+      04/01/2026  14:22  WHSE 0671  TRM 04
+      Member  111887452210
+      THANK YOU.  PLEASE COME AGAIN.

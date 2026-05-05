@@ -1,0 +1,35 @@
+CHASE FREEDOM UNLIMITED
+Statement Period: 03/15/2026 - 04/14/2026
+Account ending in   ****1234
+Cardholder: ALEX MORGAN
+
+DATE        MERCHANT                                CITY              AMOUNT
+03/15/2026  STARBUCKS STORE #04221                  AUSTIN     TX        6.45
+03/15/2026  SHELL OIL    57712998801                AUSTIN     TX       42.10
+03/16/2026  WAL-MART  #1842                         ROUND ROCK TX      127.83
+03/16/2026  AMAZON.COM*MK4Z2L9P3      AMZN.COM/BILL WA               29.99
+03/17/2026  UBER   TRIP                             SAN FRANCISCO CA    18.70
+03/17/2026  STARBUCKS STORE #04221                  AUSTIN     TX        5.85
+03/18/2026  WHOLEFDS  AUS  10355                    AUSTIN     TX       64.21
+03/19/2026  AMAZON.COM*RT8H1J2K0      AMZN.COM/BILL WA              112.45
+03/19/2026  SHELL OIL    57712998801                AUSTIN     TX       38.92
+03/20/2026  COSTCO WHSE #0671                       AUSTIN     TX      284.17
+03/21/2026  UBER EATS                               SAN FRANCISCO CA    27.40
+03/22/2026  NETFLIX.COM                             LOS GATOS  CA       15.49
+03/23/2026  WAL-MART  #1842                         ROUND ROCK TX       54.07
+03/24/2026  STARBUCKS STORE #11907                  AUSTIN     TX        7.20
+03/25/2026  SHELL OIL    57712998801                AUSTIN     TX       41.55
+03/26/2026  AMAZON.COM*9P2L1KQ4M      AMZN.COM/BILL WA               18.74
+03/27/2026  HEB #015                                AUSTIN     TX       72.39
+03/28/2026  UBER   TRIP                             AUSTIN     TX       14.22
+03/29/2026  WAL-MART  #1842                         ROUND ROCK TX      201.66
+03/30/2026  STARBUCKS STORE #04221                  AUSTIN     TX        6.45
+03/31/2026  SPOTIFY USA                             NEW YORK   NY        9.99
+04/01/2026  COSTCO GAS  #0671                       AUSTIN     TX       52.18
+04/02/2026  AMAZON.COM*ZZ7Y6X5W4      AMZN.COM/BILL WA               44.27
+04/03/2026  TARGET    00012987                      AUSTIN     TX       38.91
+04/04/2026  STARBUCKS STORE #11907                  AUSTIN     TX        5.85
+
+                                              Total Purchases   $1,419.04
+                                              Payments         -$1,200.00
+                                              New Balance         $219.04

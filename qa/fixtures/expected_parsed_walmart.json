@@ -1,0 +1,28 @@
+{
+  "store": "Walmart",
+  "date": "2026-04-12",
+  "total": 100.66,
+  "subtotal": 95.81,
+  "tax": 4.85,
+  "currency": "USD",
+  "lineItems": [
+    { "name": "GREAT VALUE 2% MILK 1GAL",       "qty": 1,    "unitPrice": 3.78,  "lineTotal": 3.78,  "taxFlag": "F" },
+    { "name": "WONDER BREAD CLASSIC",           "qty": 1,    "unitPrice": 2.48,  "lineTotal": 2.48,  "taxFlag": "F" },
+    { "name": "BANANAS",                        "qty": 2.13, "unitPrice": 0.58,  "lineTotal": 1.24,  "taxFlag": "F" },
+    { "name": "GREAT VALUE EGGS LRG 12CT",      "qty": 1,    "unitPrice": 3.12,  "lineTotal": 3.12,  "taxFlag": "F" },
+    { "name": "COCA-COLA 2 LITER",              "qty": 1,    "unitPrice": 2.18,  "lineTotal": 2.18,  "taxFlag": "T" },
+    { "name": "LAYS CLASSIC 8OZ",               "qty": 1,    "unitPrice": 3.98,  "lineTotal": 3.98,  "taxFlag": "T" },
+    { "name": "KRAFT MAC N CHEESE 7.25OZ",      "qty": 1,    "unitPrice": 1.24,  "lineTotal": 1.24,  "taxFlag": "F" },
+    { "name": "HEINZ KETCHUP 32OZ",             "qty": 1,    "unitPrice": 3.86,  "lineTotal": 3.86,  "taxFlag": "F" },
+    { "name": "CHARMIN ULTRA SOFT 12 ROLL",     "qty": 1,    "unitPrice": 14.97, "lineTotal": 14.97, "taxFlag": "T" },
+    { "name": "TIDE PODS 42CT",                 "qty": 1,    "unitPrice": 12.94, "lineTotal": 12.94, "taxFlag": "T" },
+    { "name": "DOVE BAR SOAP 4PK",              "qty": 1,    "unitPrice": 5.97,  "lineTotal": 5.97,  "taxFlag": "T" },
+    { "name": "GREAT VALUE BLEACH 121OZ",       "qty": 1,    "unitPrice": 3.24,  "lineTotal": 3.24,  "taxFlag": "T" },
+    { "name": "TYSON CHICKEN BREAST 2.5LB",     "qty": 1,    "unitPrice": 9.86,  "lineTotal": 9.86,  "taxFlag": "F" },
+    { "name": "GREAT VALUE WHITE RICE 5LB",     "qty": 1,    "unitPrice": 4.98,  "lineTotal": 4.98,  "taxFlag": "F" },
+    { "name": "FROZEN PIZZA PEPPERONI",         "qty": 1,    "unitPrice": 4.57,  "lineTotal": 4.57,  "taxFlag": "F" },
+    { "name": "HONEY NUT CHEERIOS 12OZ",        "qty": 1,    "unitPrice": 4.28,  "lineTotal": 4.28,  "taxFlag": "F" },
+    { "name": "GAIN LIQUID DET 100OZ",          "qty": 1,    "unitPrice": 11.94, "lineTotal": 11.94, "taxFlag": "T" },
+    { "name": "DEL MONTE GRN BEANS 14.5OZ",     "qty": 1,    "unitPrice": 1.18,  "lineTotal": 1.18,  "taxFlag": "F" }
+  ]
+}

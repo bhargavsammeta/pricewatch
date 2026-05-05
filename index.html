@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#FAFAF7" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#14140F" media="(prefers-color-scheme: dark)" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="pricewatch" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="icon" href="icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;550;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=1" />
+  <title>pricewatch</title>
+</head>
+<body>
+  <!-- ================= Onboarding ================= -->
+  <section id="onboarding" class="screen onboarding hidden">
+    <div class="onb-inner">
+      <div class="brand">
+        <div class="logo">
+          <span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span>
+        </div>
+        <h1>pricewatch</h1>
+        <p class="muted">Track price changes on items you buy.</p>
+      </div>
+
+      <div class="card">
+        <h2>Pick your currency</h2>
+        <p class="muted small">Used to format prices. You can change this later.</p>
+        <div class="cur-grid">
+          <button class="cur-btn" data-cur="INR"><span class="sym">₹</span><span>Rupee</span><span class="muted small">INR</span></button>
+          <button class="cur-btn" data-cur="USD"><span class="sym">$</span><span>Dollar</span><span class="muted small">USD</span></button>
+          <button class="cur-btn" data-cur="EUR"><span class="sym">€</span><span>Euro</span><span class="muted small">EUR</span></button>
+          <button class="cur-btn" data-cur="GBP"><span class="sym">£</span><span>Pound</span><span class="muted small">GBP</span></button>
+        </div>
+      </div>
+
+      <button class="primary-btn full" id="onb-continue">Continue</button>
+      <p class="muted xsmall center" style="margin-top:16px">Everything stays on your device. No accounts, no servers.</p>
+    </div>
+  </section>
+
+  <!-- ================= App Shell ================= -->
+  <main id="app" class="hidden">
+
+    <!-- ===== Inbox ===== -->
+    <section class="screen" data-screen="inbox">
+      <header class="topbar">
+        <h1 class="topbar-title">Inbox</h1>
+        <button class="icon-btn" data-action="open-settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </header>
+
+      <div class="content">
+        <label class="dropzone" id="dropzone">
+          <input type="file" id="file-input" accept=".pdf,image/*" multiple hidden />
+          <div class="dz-inner">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p class="dz-line">Drop PDF or image, or <span class="link">tap to choose</span></p>
+            <p class="muted small">Bank statements, receipts, screenshots</p>
+          </div>
+        </label>
+
+        <h2 class="section-h">Recent uploads</h2>
+        <div id="queue-list" class="list flush"></div>
+        <div id="queue-empty" class="empty hidden">
+          <p class="muted">Your uploads will appear here.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Items ===== -->
+    <section class="screen hidden" data-screen="items">
+      <header class="topbar">
+        <h1 class="topbar-title">Items</h1>
+        <button class="icon-btn" data-action="items-sort" aria-label="Sort">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+        </button>
+      </header>
+
+      <div class="content">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          <input type="search" id="items-search" placeholder="Search items..." />
+        </div>
+        <div class="chip-rail" id="items-chips"></div>
+
+        <div id="items-list" class="list flush"></div>
+        <div id="items-empty" class="empty hidden">
+          <p class="muted">Items appear here once you upload an itemized receipt.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Statements ===== -->
+    <section class="screen hidden" data-screen="statements">
+      <header class="topbar">
+        <h1 class="topbar-title">Statements</h1>
+      </header>
+
+      <div class="content">
+        <div id="statements-list"></div>
+        <div id="statements-empty" class="empty hidden">
+          <p class="muted">Uploaded documents appear here, grouped by month.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Insights ===== -->
+    <section class="screen hidden" data-screen="insights">
+      <header class="topbar">
+        <h1 class="topbar-title">Insights</h1>
+      </header>
+
+      <div class="content">
+        <div class="seg" id="insights-period">
+          <button class="seg-btn active" data-period="30">30d</button>
+          <button class="seg-btn" data-period="90">90d</button>
+          <button class="seg-btn" data-period="365">Year</button>
+          <button class="seg-btn" data-period="all">All</button>
+        </div>
+
+        <section class="insight-block" id="ins-jumps">
+          <p class="caption">Biggest price jumps</p>
+          <div class="ins-rows" id="ins-jumps-rows"></div>
+        </section>
+
+        <section class="insight-block" id="ins-mostbought">
+          <p class="caption">Most bought</p>
+          <div class="ins-rows" id="ins-mostbought-rows"></div>
+        </section>
+
+        <section class="insight-block" id="ins-cheapest">
+          <p class="caption">Cheapest store per category</p>
+          <div class="ins-rows" id="ins-cheapest-rows"></div>
+        </section>
+
+        <section class="insight-block" id="ins-topspend">
+          <p class="caption">Top spend by category</p>
+          <div class="ins-rows" id="ins-topspend-rows"></div>
+        </section>
+
+        <div id="insights-empty" class="empty hidden">
+          <p class="muted">Insights appear here once you have a couple of uploads.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Item Detail ===== -->
+    <section class="screen hidden push" data-screen="itemdetail">
+      <header class="topbar">
+        <button class="icon-btn back" data-action="back-to-items" aria-label="Back">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <h1 class="topbar-title small" id="itemdetail-title">Item</h1>
+        <span class="icon-btn-spacer"></span>
+      </header>
+
+      <div class="content">
+        <div class="hero-block">
+          <p class="caption" id="itd-category">CATEGORY</p>
+          <h1 class="hero-name" id="itd-name">Item name</h1>
+          <p class="muted small" id="itd-store">Store</p>
+          <div class="hero-price-row">
+            <span class="price-lg" id="itd-price">—</span>
+            <span class="delta" id="itd-delta"></span>
+          </div>
+        </div>
+
+        <div class="spark-wrap"><svg id="itd-spark" viewBox="0 0 300 80" preserveAspectRatio="none"></svg></div>
+
+        <div class="stat-strip">
+          <div><p class="caption">Avg</p><p class="price" id="itd-avg">—</p></div>
+          <div><p class="caption">Bought</p><p class="price" id="itd-count">—</p></div>
+          <div><p class="caption">Frequency</p><p class="price small" id="itd-freq">—</p></div>
+        </div>
+
+        <h2 class="section-h">Vendors</h2>
+        <div id="itd-vendors" class="list flush"></div>
+
+        <h2 class="section-h">Purchases</h2>
+        <div id="itd-purchases" class="list flush"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= Bottom Tab Bar ================= -->
+  <nav id="tabbar" class="tabbar hidden">
+    <button class="tab active" data-tab="inbox" aria-label="Inbox">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"/></svg>
+      <span>Inbox</span>
+    </button>
+    <button class="tab" data-tab="items" aria-label="Items">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      <span>Items</span>
+    </button>
+    <button class="tab" data-tab="statements" aria-label="Statements">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Statements</span>
+    </button>
+    <button class="tab" data-tab="insights" aria-label="Insights">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 3-3 4 4 5-7"/></svg>
+      <span>Insights</span>
+    </button>
+  </nav>
+
+  <!-- ================= Settings sheet ================= -->
+  <div class="sheet-backdrop hidden" id="settings-backdrop"></div>
+  <aside class="sheet hidden" id="settings-sheet">
+    <header class="sheet-head">
+      <h2>Settings</h2>
+      <button class="icon-btn" data-action="close-settings" aria-label="Close">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </header>
+    <div class="sheet-body">
+      <div class="row">
+        <div><p class="row-title">Theme</p><p class="muted small">Auto follows your system</p></div>
+        <select id="set-theme">
+          <option value="auto">Auto</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+      <div class="row">
+        <div><p class="row-title">Currency</p><p class="muted small">For display formatting</p></div>
+        <select id="set-currency">
+          <option value="INR">₹ INR</option>
+          <option value="USD">$ USD</option>
+          <option value="EUR">€ EUR</option>
+          <option value="GBP">£ GBP</option>
+        </select>
+      </div>
+
+      <h3 class="sheet-section">Data</h3>
+      <button class="row btn-row" id="export-btn">
+        <div><p class="row-title">Export backup</p><p class="muted small">Download all data as JSON</p></div>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+      <label class="row btn-row">
+        <div><p class="row-title">Import backup</p><p class="muted small">Restore from a JSON file</p></div>
+        <input type="file" id="import-input" accept=".json" hidden />
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </label>
+
+      <h3 class="sheet-section danger">Danger zone</h3>
+      <button class="row btn-row danger" id="clear-btn">
+        <div><p class="row-title">Erase all data</p><p class="muted small">Statements, items, settings — all gone</p></div>
+      </button>
+
+      <p class="muted xsmall center" style="margin-top:24px">pricewatch · everything stays on your device</p>
+    </div>
+  </aside>
+
+  <!-- ================= Review sheet ================= -->
+  <div class="sheet-backdrop hidden" id="review-backdrop"></div>
+  <aside class="sheet hidden" id="review-sheet">
+    <header class="sheet-head">
+      <div>
+        <h2 id="review-title">Review</h2>
+        <p class="muted small" id="review-sub"></p>
+      </div>
+      <button class="icon-btn" data-action="close-review" aria-label="Close">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </header>
+    <div class="sheet-body" id="review-body"></div>
+    <footer class="sheet-foot">
+      <button class="primary-btn full" id="review-save">Save</button>
+    </footer>
+  </aside>
+
+  <!-- ================= Viewer sheet (statement source) ================= -->
+  <div class="sheet-backdrop hidden" id="viewer-backdrop"></div>
+  <aside class="sheet full hidden" id="viewer-sheet">
+    <header class="sheet-head">
+      <button class="icon-btn" data-action="close-viewer" aria-label="Close">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <h2 id="viewer-title" class="ellipsis">Statement</h2>
+      <button class="icon-btn" data-action="viewer-delete" aria-label="Delete">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+    </header>
+    <div class="sheet-body viewer-body" id="viewer-body"></div>
+  </aside>
+
+  <!-- ================= Toast ================= -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- ================= Sort sheet ================= -->
+  <div class="sheet-backdrop hidden" id="sort-backdrop"></div>
+  <aside class="sheet hidden" id="sort-sheet">
+    <header class="sheet-head"><h2>Sort items</h2>
+      <button class="icon-btn" data-action="close-sort" aria-label="Close">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </header>
+    <div class="sheet-body">
+      <button class="row btn-row sort-opt" data-sort="recent">Recent purchase</button>
+      <button class="row btn-row sort-opt" data-sort="jump">Biggest price jump</button>
+      <button class="row btn-row sort-opt" data-sort="alpha">A–Z</button>
+      <button class="row btn-row sort-opt" data-sort="bought">Most bought</button>
+    </div>
+  </aside>
+
+  <!-- ================= External libs (lazy via app.js) ================= -->
+  <script src="app.js?v=1" defer></script>
+</body>
+</html>
